@@ -1,71 +1,49 @@
-// server/server.js
-line = line.trim();
-console.log('Arduino ->', line);
-// Repassa para clientes conectados
-io.emit('arduino', line);
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import { SerialPort } from "serialport";
+import { ReadlineParser } from "@serialport/parser-readline";
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" }
 });
 
+// -------- SERVIR FRONT (opcional se fizer build) --------
+// app.use(express.static("dist"));
 
-port.on('open', () => console.log('Serial port opened', SERIAL_PORT));
-port.on('error', (err) => console.error('Serial error', err.message));
-} catch (err) {
-console.error('Falha ao abrir porta serial:', err.message);
-}
-}
-
-
-// Serve frontend estático
-app.use('/', express.static(path.join(__dirname, '..', 'public')));
-
-
-// Endpoints REST simples (opcionais)
-app.get('/api/varal/extend', (req, res) => {
-sendToArduino('VARAL:EXTEND');
-res.json({ ok: true });
-});
-app.get('/api/varal/retract', (req, res) => {
-sendToArduino('VARAL:RETRACT');
-res.json({ ok: true });
-});
-app.get('/api/light/:n/:action', (req, res) => {
-const { n, action } = req.params;
-sendToArduino(`LIGHT:${n}:${action.toUpperCase()}`);
-res.json({ ok: true });
+// -------- SERIAL ARDUINO --------
+const port = new SerialPort({
+  path: "COM3",    // ALTERAR AQUI
+  baudRate: 9600,
 });
 
+const parser = port.pipe(new ReadlineParser({ delimiter: "\n" }));
 
-function sendToArduino(msg) {
-if (port && port.isOpen) {
-port.write(msg + '\n', (err) => {
-if (err) console.error('Erro ao enviar serial:', err.message);
-else console.log('Sent to Arduino:', msg);
-});
-} else {
-console.warn('Porta serial não aberta. Mensagem não enviada:', msg);
-}
-}
+parser.on("data", (data) => {
+  data = data.trim();
+  console.log("Arduino:", data);
 
-
-// WebSocket (socket.io)
-io.on('connection', (socket) => {
-console.log('Client connected', socket.id);
-
-
-socket.on('cmd', (data) => {
-console.log('Client cmd', data);
-// data { type: 'VARAL'|'LIGHT', payload: ... }
-// aceitamos também mensagens simples
-if (typeof data === 'string') sendToArduino(data);
-else if (data && data.cmd) sendToArduino(data.cmd);
+  // Enviar para o FRONT
+  io.emit("arduino-data", data);
 });
 
+// -------- RECEBER COMANDOS DO FRONT --------
+io.on("connection", (socket) => {
+  console.log("Cliente conectado!");
 
-socket.on('disconnect', () => console.log('Client disconnected', socket.id));
+  socket.on("comando", (cmd) => {
+    console.log("Comando recebido:", cmd);
+
+    if (cmd === "ESTENDER") {
+      port.write("ESTENDER\n");
+    } else if (cmd === "RECOLHER") {
+      port.write("RECOLHER\n");
+    }
+  });
 });
 
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-console.log(`Server running on http://localhost:${PORT}`);
-startSerial();
+server.listen(3000, () => {
+  console.log("Server rodando em http://localhost:3000");
 });
