@@ -1,0 +1,33 @@
+body {
+  font-family: Arial;
+  background: #f4f4f4;
+  text-align: center;
+  padding-top: 50px;
+}
+
+h1 {
+  margin-bottom: 40px;
+}
+
+.menu .btn, .control-btn {
+  display: block;
+  width: 250px;
+  margin: 15px auto;
+  padding: 15px;
+  background: #333;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.menu .btn:hover,
+.control-btn:hover {
+  background: #555;
+}
+
+.container {
+  margin-top: 40px;
+}

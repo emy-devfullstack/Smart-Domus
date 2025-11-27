@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Iluminação</title>
+  <link rel="stylesheet" href="../style.css" />
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="../js/iluminacao.js"></script>
+</head>
+<body>
+
+  <h1>Controle de Iluminação</h1>
+
+  <div class="container">
+    <h2>Cômodo 1</h2>
+    <button class="control-btn" onclick="toggleLight(1, 'on')">Ligar</button>
+    <button class="control-btn" onclick="toggleLight(1, 'off')">Desligar</button>
+  </div>
+
+  <div class="container">
+    <h2>Cômodo 2</h2>
+    <button class="control-btn" onclick="toggleLight(2, 'on')">Ligar</button>
+    <button class="control-btn" onclick="toggleLight(2, 'off')">Desligar</button>
+  </div>
+
+  <div class="container">
+    <h2>Cômodo 3 (com sensor)</h2>
+    <button class="control-btn" onclick="toggleLight(3, 'on')">Ligar</button>
+    <button class="control-btn" onclick="toggleLight(3, 'off')">Desligar</button>
+
+    <p id="sensorStatus">Sensor: ---</p>
+  </div>
+
+  <a href="../index.html" class="btn">Voltar</a>
+
+</body>
+</html>
